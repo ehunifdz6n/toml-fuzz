@@ -17,8 +17,11 @@ build/repro: $(SRC) tools/repro.c src/toml.h | build
 build/fuzz_parse: $(SRC) fuzz/fuzz_parse.c src/toml.h | build
 	$(FUZZ_CC) $(FUZZ_FLAGS) -o $@ $(SRC) fuzz/fuzz_parse.c
 
+FUZZ_ARGS ?= -max_len=65536
+
 fuzz: build/fuzz_parse
-	./build/fuzz_parse fuzz/corpus -dict=fuzz/config.dict -max_len=65536
+	python3 tools/gen_seeds.py fuzz/corpus
+	./build/fuzz_parse fuzz/corpus -dict=fuzz/config.dict $(FUZZ_ARGS)
 
 smoke: build/repro
 	./build/repro examples/service.conf
