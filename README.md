@@ -27,7 +27,8 @@ overflow, unbounded loop, and parser output that survives the limits of the
 backing buffers (e.g. a string longer than its field).
 
 Non-goals: nested tables, inline tables, datetimes, floats, multi-line strings,
-and UTF-8 validation. Input over 1 MiB is rejected before parsing starts.
+nested arrays (rejected with a dedicated error), and UTF-8 validation. Input
+over 1 MiB is rejected before parsing starts.
 
 ## Mitigations
 
@@ -54,8 +55,13 @@ make smoke                # parse examples/service.conf
 Fuzzing:
 
 ```sh
-make fuzz                 # 60s warm-up; add -max_total_time=600 for longer
+make fuzz                 # regenerate seeds, then 60s warm-up
+make fuzz FUZZ_ARGS=-max_total_time=600   # longer run
 ```
+
+`tools/gen_seeds.py` writes `fuzz/corpus/` (git-ignored) from a fixed list of
+grammar decisions and limit boundaries, so the starting corpus is reproducible
+and does not have to be committed file by file.
 
 ## Reproducing a finding
 
@@ -79,11 +85,13 @@ issue. A fix without a reproducer is treated as unverified.
 ## Layout
 
 ```
-src/toml.h        public types, limits, and the parse contract
-src/toml.c        parser: cursor, scanner, value readers, document writer
-fuzz/fuzz_parse.c libFuzzer entry point plus post-parse invariants
-tools/repro.c     single-file driver used to confirm and inspect inputs
-examples/         sample config used by `make smoke`
+src/toml.h         public types, limits, and the parse contract
+src/toml.c         parser: cursor, scanner, value readers, document writer
+fuzz/fuzz_parse.c  libFuzzer entry point plus post-parse invariants
+fuzz/config.dict   libFuzzer dictionary for grammar tokens and escapes
+tools/gen_seeds.py deterministic corpus generator for `make fuzz`
+tools/repro.c      single-file driver used to confirm and inspect inputs
+examples/          sample config used by `make smoke`
 ```
 
 ## Status

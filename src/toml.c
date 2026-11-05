@@ -199,6 +199,8 @@ static int read_array(struct cursor *c, struct toml_error *err,
 		}
 		if (entry->array_len == TOML_MAX_ARRAY)
 			return fail(err, c, "array longer than 32 elements");
+		if (peek(c) == '[')
+			return fail(err, c, "nested arrays unsupported");
 		if (peek(c) == '"') {
 			entry->array[entry->array_len].kind = TOML_STRING;
 			if (read_string(c, err,

@@ -1,0 +1,42 @@
+# libFuzzer dictionary for the config grammar.
+# Tokens are weighted toward the bytes that move the cursor into a new state,
+# so coverage lands on escapes, delimiters and boundaries instead of retyping
+# random printable filler.
+
+# structural
+"="
+"\n"
+"#"
+"["
+"]"
+"[a]"
+"[a.b]"
+","
+" = "
+"\r\n"
+
+# values
+"0"
+"1"
+"-1"
+"+1"
+"9223372036854775807"
+"9223372036854775808"
+"true"
+"false"
+"\"\""
+
+# escapes and quoting
+"\""
+"\\"
+"\\\""
+"\\\\"
+"\\n"
+"\\t"
+"\\q"
+
+# near-limit shapes
+"k = [1, 2, 3]"
+"k = ["
+"k = \""
+"a = 1\na = 2\n"
